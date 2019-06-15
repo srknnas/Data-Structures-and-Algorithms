@@ -1,53 +1,74 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
-struct Node {
-	int data;
-	struct Node* next;
-};
-struct Node* head;
 
-void Insert(int x);
-void Print();
+#define R 256
 
-//Basa ekleme
-void Insert(int x)
+typedef struct Node
 {
-	Node* temp = (Node*)malloc(sizeof(struct Node)); //pointerin gosterdigi yere alan aciyorum.
-	temp->data = x;
-	temp->next = NULL;
-	if(head != NULL)
-		temp->next = head;
-	head = temp;
-}
+	int value;
+	Node* next[R];
+} Node;
 
-void Print() 
+//Birinci dereceden pointer icin node kadar yer ayriliyor.
+Node* getNode()
 {
-	struct Node* temp = head;
-	printf("List is: ");
-	while(temp != NULL)
+	Node * pNode = NULL;
+	pNode = (Node *)malloc(sizeof(Node));
+	if (pNode)
 	{
-		printf(" %d", temp->data);
-		temp = temp->next;
+		for (int i = 0; i < R; i++)
+		pNode->next[i] = NULL;
 	}
-	printf("\n");
+	return pNode;
 }
 
-int main(int argc, char *argv[]) {
-	int n, i, x;
-	head = NULL;
-	
-	//Kac tane eleman eklenecek onun verisini aliyoruz.
-	printf("How many numbers?\n");
-	scanf("%d", &n);
-	
-	for(i = 0; i < n; i++){
-		printf("Enter the Number \n");
-		scanf("%d",&x);
-		//Basa ekleme fonksiyonu
-		Insert(x);
-		//Ekrana yazma fonksiyonu
-		Print();
+//kelimeye deger atama
+void put(Node** x, char *key, int val, int d)
+{         
+	if (*x == NULL) 
+		*x = getNode(); //Birinci dereceden pointer için yer ayiriyoruz.
+		
+	//Her bir karakter için asagida Recursive fonksiyon oldugundan 
+	//karakterin uzunlugu esit oluncaya kadar devam eder. 
+	if (d == strlen(key)) 
+	{
+		(*x)->value = val; //En son olusturulan pointer icine value degeri ataniyor.
+		return;
 	}
+	char c = key[d];
+	
+	//karakterin degeri recursive fonksiyon ile yeniden pointer olusturuyor.
+	put(&((*x)->next[c]), key, val, d+1);
+}
+
+//kelimenin degerini ogrenme
+int get(Node* x, char * key, int d)
+{
+	if (x == NULL) 
+		return -1; //-1 refers no match
+	if (d == strlen(key)) 
+		return x->value;
+	
+	char c = key[d];
+	
+	return get(x->next[c], key, d+1);
+}
+
+
+int main(int argc, char** argv) {
+	int value;
+	Node* root;
+	
+	put(&root, "the", 5, 0);
+	put(&root, "shore", 7, 0);
+	value = get(root, "the", 0);
+	printf("%d\n", value);
+	value = get(root, "shore", 0);
+	printf("%d\n", value);
+	
+	return 0;
 }
